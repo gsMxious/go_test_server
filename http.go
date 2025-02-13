@@ -22,14 +22,18 @@ func sseHandler(w http.ResponseWriter, r *http.Request) {
 	done := make(chan bool)
 
 	// 启动一个 goroutine 来监听客户端关闭连接的情况
-	// go func() {
-	// 	// 当客户端关闭连接时，读取请求体将返回错误
-	// 	_, err := r.Body.Read(make([]byte, 1))
-	// 	if err != nil {
-	// 		log.Println("Client disconnected")
-	// 		done <- true
-	// 	}
-	// }()
+	go func() {
+		// 当客户端关闭连接时，读取请求体将返回错误
+		n := 0
+		for {
+			time.Sleep(3 * time.Second)
+			n++
+			if n == 60 {
+				done <- true
+				return
+			}
+		}
+	}()
 
 	// 循环发送 "Hello, World!" 消息
 	for {
@@ -44,7 +48,7 @@ func sseHandler(w http.ResponseWriter, r *http.Request) {
 			w.(http.Flusher).Flush()
 			log.Println("Sent: Hello, World!")
 			// 等待一段时间再发送下一个消息
-			time.Sleep(1 * time.Second)
+			time.Sleep(3 * time.Second)
 		}
 	}
 }
@@ -52,7 +56,7 @@ func sseHandler(w http.ResponseWriter, r *http.Request) {
 func httpMain() {
 	http.HandleFunc("/", handler)
 	http.HandleFunc("/sse", sseHandler)
-	fmt.Println("Starting server at port 8080")
+	log.Println("Starting server at port 8080")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		fmt.Println(err)
 	}

@@ -3,19 +3,21 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"net"
 	"os"
 )
 
 func tcpMain() {
-	listener, err := net.Listen("tcp", ":8080")
+	listener, err := net.Listen("tcp", ":8081")
 	if err != nil {
 		fmt.Println("Error starting TCP server:", err)
 		os.Exit(1)
 	}
 	defer listener.Close()
 
-	fmt.Println("Server is listening on port 8080")
+	logtcp := log.New(os.Stdout, "[TCP] ", log.LstdFlags)
+	logtcp.Println("Server tcp is listening on port 8081")
 
 	for {
 		conn, err := listener.Accept()
@@ -31,13 +33,14 @@ func tcpMain() {
 func handleConnection(conn net.Conn) {
 	defer conn.Close()
 	reader := bufio.NewReader(conn)
+	logtcp := log.New(os.Stdout, "[TCP] ", log.LstdFlags)
 	for {
 		message, err := reader.ReadString('\n')
 		if err != nil {
 			fmt.Println("Error reading from connection:", err)
 			return
 		}
-		fmt.Print("Message received:", message)
+		logtcp.Print("Message received:", message)
 		conn.Write([]byte("Message received\n"))
 	}
 }

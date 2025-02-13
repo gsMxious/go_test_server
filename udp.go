@@ -2,14 +2,15 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net"
 	"os"
 )
 
 func udpMain() {
 	addr := net.UDPAddr{
-		Port: 8080,
-		IP:   net.ParseIP("127.0.0.1"),
+		Port: 9000,
+		IP:   net.IPv4zero,
 	}
 
 	conn, err := net.ListenUDP("udp", &addr)
@@ -18,6 +19,8 @@ func udpMain() {
 		os.Exit(1)
 	}
 	defer conn.Close()
+	logudp := log.New(os.Stdout, "[UDP] ", log.LstdFlags)
+	logudp.Println("Server is listening on port 9000")
 
 	buffer := make([]byte, 1024)
 	for {
@@ -27,7 +30,7 @@ func udpMain() {
 			continue
 		}
 
-		fmt.Printf("Received %s from %s\n", string(buffer[:n]), clientAddr)
+		logudp.Printf("Received %s from %s\n", string(buffer[:n]), clientAddr)
 
 		_, err = conn.WriteToUDP([]byte("Message received"), clientAddr)
 		if err != nil {
